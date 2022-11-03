@@ -18,8 +18,13 @@
 <script setup lang='ts'>
 import * as THREE from "three";
 function getThreeFun(){
+    /**
+     * 创建场景对象Scene
+     */
     let scene = new THREE.Scene();
     console.log(scene)
+    THREE
+    let geometry = new THREE.BoxGeometry(100,100,100);
 }
 getThreeFun()
 </script>
