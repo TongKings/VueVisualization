@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .btn,
+      .btn2 {
+        position: relative;
+        width: 150px;
+        height: 60px;
+        background: #409eff;
+        outline: 0;
+        border: none;
+        padding: 12px 20px;
+        overflow: hidden;
+        color: #fff;
+      }
+      .btn::before,
+      .btn2::before {
+        content: '';
+        display: block;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        transition: 0.2s;
+        background: #fff;
+        opacity: 0;
+      }
+      .btn:active::before,
+      .btn2:active::before {
+        opacity: 0.2;
+      }
+      .btn::after {
+        content: '';
+        display: block;
+        position: absolute;
+        width: 200%;
+        height: 100%;
+        left: var(--x, 0);
+        top: var(--y, 0);
+        background-image: radial-gradient(circle, rgb(255, 10, 10) 10%, transparent 10.01%);
+        background-repeat: no-repeat;
+        /* background-position: 50%; */
+        transform: translate(-50%, -50%) scale(10);
+        opacity: 0;
+        transition: transform 0.8s, opacity 0.8s;
+      }
+      .btn:active::after {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.3;
+        transition: 0s;
+      }
+      .btn2::after {
+        content: '';
+        display: block;
+        position: absolute;
+        background: rgb(255, 255, 255, 0.7);
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0;
+        transition: all 0.8s, opacity 0.8s;
+      }
+      .btn2:active::after {
+        left: var(--l, 0);
+        right: var(--r, 0);
+        opacity: 0.3;
+        transition: 0s;
+      }
+      div{
+        width: 200px;
+        height: 200px;
+
+        background-color:yellow;
+      }
+      #iiii{
+        width: 50px;
+        height: 50px;
+        transform: translate(50%, 50%) scale(0.5,0.5);
+        background-color:rgb(119, 0, 255);
+        transition: transform 10s;
+      }
+      #iiii:active{
+        transform: translate(50%, 50%) scale(2);
+
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 水波纹扩散 -->
+    <div class="btn">水波纹散开</div>
+    <!-- 两边扩散 -->
+    <button class="btn2">两边散开</button>
+    <div>
+      <div id="iiii"></div>
+    </div>
+    <canvas id="glcanvas"></canvas>
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.3/axios.min.js" >
+  
+</script>
+  <script>
+    // (() => {
+      const el = document.querySelector('.btn');
+      el.addEventListener('mousedown', e => {
+        const { left, top } = el.getBoundingClientRect();
+        el.style = `--x:${e.clientX - left}px;--y:${e.clientY - top}px`;
+      });
+
+      const el2 = document.querySelector('.btn2');
+      el2.addEventListener('mousedown', e => {
+        const { left, right } = el2.getBoundingClientRect();
+        el2.style = `--l:${e.clientX - left}px;--r:${right - e.clientX}px`;
+      });
+    // })();
+    let promise = ()=>{
+      const baseURL = 'https://tenapi.cn/video/';
+      // const baseURL = 'https://tenapi.cn/wbsp/'; //微博视频
+      // const url = "url=https://h5.pipix.com/s/MvF5dco"
+        return new Promise((res,rej)=>{
+          axios({
+          // url,
+          baseURL,
+          withcredentials: true,
+          method: "get",
+          params: {
+            // url: "https://v.douyin.com/MvxvYX1"
+            // url: "https://www.bilibili.com/video/BV1TE411q7mW"
+            // url: "https://video.weibo.com/show?fid=1034:4831700266713120"
+            // url: "https://h5.pipix.com/s/MvF5dco"
+            
+          }
+
+        }).then(data=>{
+          if(data.status === 200){
+            if(!(data.data.url.includes("http"))){
+            res("https:"+data.data.url)
+            }else{
+            res(data.data.url)
+              
+            }
+          }
+        }).catch((error) => {
+          rej(error)
+      })
+        })
+    }
+    let prox = async ()=>{
+      let a = await promise();
+      let b = await exportFile(a,"test");
+      console.log(a);
+    }
+    prox();
+const exportFile = async (data, fileName)=>{
+ // 地址不存在时，禁止操作
+  if(!data)return;
+  // 下载文件并保存到本地
+  const callback = (data)=>{
+   // 创建a标签，使用 html5 download 属性下载，
+    const link = document.createElement('a');
+   // 创建url对象
+    const objectUrl = window.URL.createObjectURL(new Blob([data],{type: "video/mp4"}));
+    link.style.display='none';
+    link.href=objectUrl;
+   // 自定义文件名称， fileName
+    link.download = fileName; 
+    document.body.appendChild(link); 
+    link.click();
+   // 释放节点
+    document.body.removeChild(link); 
+   // 释放url
+    window.URL.revokeObjectURL(objectUrl);
+  };
+  // 把接口返回的url地址转换为 blob
+  const xhr = new XMLHttpRequest();
+  xhr.open('get', data,true);
+  xhr.responseType = 'blob';
+  xhr.onload = ()=> {
+   // 返回文件流，进行下载处理
+   console.log(xhr)
+    callback(xhr.response);
+  };
+  xhr.onerror = function() { // 仅在根本无法发出请求时触发
+  console.log(`Network Error`);
+};
+
+xhr.onprogress = function(event) { // 定期触发
+  // event.loaded —— 已经下载了多少字节
+  // event.lengthComputable = true，当服务器发送了 Content-Length header 时
+  // event.total —— 总字节数（如果 lengthComputable 为 true）
+  console.log(`Received ${event.loaded} of ${event.total}`);
+};
+  xhr.send(); // 不要忘记发送
+
+};
+
+  </script>
+</html>
