@@ -77,7 +77,7 @@ function getThreeFun(){
     div_target?.appendChild(renderer.domElement); //body元素中插入canvas对象
     //执行渲染操作   指定场景、相机作为参数
     renderer.render(scene, camera)
-    console.log(scene,geometry,material,mesh,point,axes,camera,renderer)
+    // console.log(scene,geometry,material,mesh,point,axes,camera,renderer)
 }
 
 </script>
