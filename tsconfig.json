@@ -13,6 +13,7 @@
       "ESNext",
       "DOM"
     ],
+    "noImplicitAny": false,
     "skipLibCheck": true,
     "noEmit": true,
     "paths": {

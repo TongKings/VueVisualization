@@ -4,7 +4,7 @@
         "addcure(今日治愈新增)": "",
         "adddeath(今日死亡新增)": "",
         "addjwsr(今日境外输入新增)": "",
-        "addlocIncrNum(今日本土新增)"
+        "addlocIncrNum(今日本土新增)": ""
     },
     "cachetime(数据缓存时间)": "",
     "curetotal(国内治愈总数)": "",

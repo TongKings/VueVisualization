@@ -1,96 +1,96 @@
 <!--设置抽屉-->
 <template>
     <div class="set-drawer">
-        <el-drawer v-model="isDrawer" :with-header="false" direction="ltr" :before-close="handleClose" size='500px'>
+        <el-drawer v-model="isDrawer" :with-header="false" direction="ltr" :before-close="handleClose" size='900px'>
             <dv-border-box-13 :color="setData.sysColor" class="drawer-div">
-                <h2>系统设置</h2>
+                <h2>System settings</h2>
                 <el-form>
-                    <el-form-item label="球体自转：">
+                    <el-form-item label="Sphere rotation:">
                         <el-switch v-model="setData.autoRotate" @change="changeSetData('autoRotate')"
                             style=" --el-switch-on-color: #555555">
                         </el-switch>
                     </el-form-item>
-                    <el-form-item label="球体拖拽：">
+                    <el-form-item label="Sphere drag:">
                         <el-switch v-model="setData.isDrag" @change="changeSetData('isDrag')"
                             style="--el-switch-on-color: #555555">
                         </el-switch>
                     </el-form-item>
-                    <el-form-item label="球体缩放：">
+                    <el-form-item label="Sphere scaling:">
                         <el-switch v-model="setData.isZoom" @change="changeSetData('isZoom')"
                             style="--el-switch-on-color: #555555">
                         </el-switch>
                     </el-form-item>
-                    <el-form-item label="球体标签：">
+                    <el-form-item label="Sphere label:">
                         <el-switch v-model="setData.isTag" @change="changeSetData('isTag')"
                             style="--el-switch-on-color: #555555">
                         </el-switch>
                     </el-form-item>
-                    <el-form-item label="数据来源：">
+                    <el-form-item label="Data source: ">
                         <el-radio-group v-model="setData.dataType" @change="changeSetData('dataType')">
                             <el-radio-button v-for="item in dataTypeList" :label="item" :key="item" :disabled="item == '在线'"
-                                :title="item == '在线' ? '在线api失效' : ''"
+                                :title="item == 'Online' ? 'Online API failure' : ''"
                                 style="--el-radio-button-checked-border-color:#555555;--el-radio-button-checked-bg-color:#555555;--el-border-radius-base: 0px;">
                                 <template #default="label">
                                     <div style="display:flex ;">
-                                        <img v-if="item == '在线'" :src="onImg" style="height:18px;margin: auto 5px;" />
-                                        <img v-if="item == '离线'" :src="offImg" style="height:18px;margin: auto 5px" />
+                                        <img v-if="item == 'Online'" :src="onImg" style="height:18px;margin: auto 5px;" />
+                                        <img v-if="item == 'Offline'" :src="offImg" style="height:18px;margin: auto 5px" />
                                         <div style="margin: auto;">{{ item }}</div>
                                     </div>
                                 </template>
                             </el-radio-button>
                         </el-radio-group>
                     </el-form-item>
-                    <el-form-item label="球体类型：">
+                    <el-form-item label="Sphere type">
                         <el-radio-group v-model="setData.sphereType" @change="changeSetData('sphereType')">
                             <el-radio-button v-for="item in sphereTypeList" :label="item" :key="item"
                                 style="--el-radio-button-checked-border-color:#555555;--el-radio-button-checked-bg-color:#555555;--el-border-radius-base: 0px;">
                                 <template #default="label">
                                     <div style="display:flex ;">
-                                        <img v-if="item == '粒子'" :src="lzImg" style="height:18px;margin: auto 5px;" />
-                                        <img v-if="item == '黑夜'" :src="hyImg" style="height:18px;margin: auto 5px" />
-                                        <img v-if="item == '白昼'" :src="bzImg" style="height:18px;margin: auto 5px" />
+                                        <img v-if="item == 'particle'" :src="lzImg" style="height:18px;margin: auto 5px;" />
+                                        <img v-if="item == 'night'" :src="hyImg" style="height:18px;margin: auto 5px" />
+                                        <img v-if="item == 'day'" :src="bzImg" style="height:18px;margin: auto 5px" />
                                         <div style="margin: auto;">{{ item }}</div>
                                     </div>
                                 </template>
                             </el-radio-button>
                         </el-radio-group>
                     </el-form-item>
-                    <el-form-item label="自转速度：" v-if="setData.autoRotate">
+                    <el-form-item label="Rotation speed:" v-if="setData.autoRotate">
                         <el-slider v-model="setData.rotateSpeed" @input="changeSetData('rotateSpeed')"
                             style="--el-color-primary:#555555" />
                     </el-form-item>
-                    <el-form-item label="主题定制：">
+                    <el-form-item label="Theme customization:">
                         <el-popover placement="top" trigger="click">
                             <template #reference>
-                                <el-button class="presets-btn">预设</el-button>
+                                <el-button class="presets-btn">Presets</el-button>
                             </template>
                             <div class="color-div" v-for="item in colorList" :key="item[0]" @click="presetsColor(item)">
-                                <div class="color1" :style="{ backgroundColor: item[0] }">主色</div>
-                                <div class="color2" :style="{ backgroundColor: item[1] }">副色</div>
+                                <div class="color1" :style="{ backgroundColor: item[0] }">Dominant color</div>
+                                <div class="color2" :style="{ backgroundColor: item[1] }">Secondary color</div>
                             </div>
                         </el-popover>
                         <input id="colorInp" style="height: 0px;opacity: 0;width: 0px;margin: 0px;padding: 0px;"
                             type="color" />
                         <el-button class="main-color" :color="setData.sysColor[0]" @click="changeColor(0)">
-                            主色
+                            Dominant color
                         </el-button>
                         <el-button class="secondary-color" :color="setData.sysColor[1]" @click="changeColor(1)">
-                            副色
+                            Secondary color
                         </el-button>
-                        <el-button class="sure-btn" @click="sureColor">确定</el-button>
+                        <el-button class="sure-btn" @click="sureColor">Confirm</el-button>
                     </el-form-item>
-                    <el-form-item label="系统重置：">
+                    <el-form-item label="System reset:">
                         <el-button @click="refreshPage" color="#555555" style="border-radius: 0px;">
                             <el-icon style="margin-right:10px;" :size="20">
                                 <Refresh />
                             </el-icon>
-                            重置
+                            reset
                         </el-button>
                     </el-form-item>
                 </el-form>
                 <!--版本号盒子-->
                 <div class="ver-div">
-                    版本号：v{{ setData.sysVer }}
+                    version：v{{ setData.sysVer }}
                 </div>
             </dv-border-box-13>
         </el-drawer>
@@ -109,7 +109,7 @@ let props = defineProps({
     isDrawer: Boolean,//抽屉状态
 }),
     setData: any = ref({
-        sphereType: "粒子",//球体类型
+        sphereType: "particle",//球体类型
         isDrag: true,//拖拽
         isZoom: true,//缩放
         isTag: true,//标签
@@ -117,12 +117,12 @@ let props = defineProps({
         rotateSpeed: 10,//旋转速度
         sysVer: "",//系统版本号
         dataType: "",//数据来源
-        sysColor: ["#7b52f7", "#c5b2ff"],//系统配色
+        sysColor: ["#a6c1ee", "#96e6a1"],//系统配色
         // sysColor: ["#", "#c5b2ff"],//系统配色
     }),
     isDrawer = ref(false),
-    sphereTypeList = ["粒子", "黑夜", "白昼"],//球体列表
-    dataTypeList = ["离线", "在线"],//数据来源列表
+    sphereTypeList = ["particle", "night", "day"],//球体列表
+    dataTypeList = ["Offline", "Online"],//数据来源列表
     emits = defineEmits(["close", "changeSetData"]),
     colorType: any = null,//主题颜色类型
     colorList: any = [

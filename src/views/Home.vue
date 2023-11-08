@@ -8,7 +8,9 @@ import Sphere from './SphereView.vue';
 <template>
   <!-- <IndexView msg="123" /> -->
   <div class="home">
-    <Sphere />
+    <Suspense>
+      <Sphere />
+    </Suspense>
   </div>
 </template>
 

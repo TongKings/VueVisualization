@@ -8,13 +8,13 @@ import gsap from "gsap";
 import * as echarts from "echarts";
 import PK from "@/../package.json";
 // import jsonp from "@/utils/jsonpUtils";
-// import jsonp1 from "@/utils/jsonpUtils1";
+import jsonp1 from "@/utils/jsonpUtils1";
 import { getWordBlob } from "@/utils/getWordBlob.js";
 import addNumber from "@/components/addNumber.vue";
 import countryPosition from "@/assets/json/countryPosition.json";
 // import { dataSource1, dataSource2 } from "@/api/request";
 import tempData from "@/assets/json/tempWorldData.json";
-import tempProvinceData from "@/assets/json/tempProvinceData.json";
+// import tempProvinceData from "@/assets/json/tempProvinceData.json";
 import tempIpData from "@/assets/json/tempIpData.json";
 import universeImg from "@/assets/img/universe.jpg";
 import starImg from "@/assets/img/star.jpg";
@@ -33,6 +33,13 @@ import ChinaTabDrawer from "@/views/ChinaTabDrawer.vue";
 import ReportDrawer from "@/views/ReportDrawer.vue";
 import ProvinceEchartDrawer from "@/views/ProvinceEchartDrawer.vue";
 import wordImg from "@/assets/img/word.png";
+import axios from 'axios';
+
+
+const tempProvinceData = await axios.get("/api/jsondata").then(res => res.data).catch(error => {
+  console.log(error);
+});
+
 let version: any = ref(PK.version),//系统版本号
     mobileDiv: any = ref(true),//手机端遮罩
     scene: any = null, //场景(频繁变更的对象放置在vue的data中会导致卡顿)
@@ -91,11 +98,11 @@ watch(
 function judgeDevice() {
     let isMobile = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);
     if (isMobile) {
-        alert("当前项目暂未适配移动端，请在pc端打开！");
+        alert("The previous project is not yet compatible with mobile devices. Please open it on the PC!");
     } else {
         mobileDiv.value = false;//关闭手机端遮罩
         dvColor.value = JSON.parse(sessionStorage.getItem("config") as any).sysColor;//获取系统配色
-        alert( dvColor.value)
+        // alert( dvColor.value)
         getCOVID19Data(); //获取疫情数据
     }
 };
@@ -165,7 +172,7 @@ function decodingStr(str: any) {
 function getCOVID19Data() {
     isLoading.value = true;
     dataType.value = JSON.parse(sessionStorage.getItem("config") as any).dataType;
-    if (dataType.value == "在线") {
+    if (dataType.value == "Online") {
         // dataSource1()
         //     .then((res) => {
         //         console.log("vue代理dataSource1获取数据");
@@ -178,7 +185,7 @@ function getCOVID19Data() {
         //         jsonpGetData();
         //     });
     } else {
-        console.log("使用tempData数据");
+        console.log("ues tempData data ");
         allData.value = tempData.data;
         structureData(allData.value); //构造数据  
         isLoading.value = false;
@@ -187,7 +194,7 @@ function getCOVID19Data() {
 
 //jsonp方式获取数据
 function jsonpGetData() {
-    let jsonpUrl: any = process.env.VUE_APP_1;//获取环境变量中的url地址
+    let jsonpUrl: any = process.env.VITE_APP_1;//获取环境变量中的url地址
     let callBackName = "jsoncallback";//回调名
     // jsonp(jsonpUrl, (res: any) => {
     //     if (res.status.msg = "success") {
@@ -367,7 +374,7 @@ function createLight() {
 //创建球体
 async function createSphere(data: any) {
     let sphereType = JSON.parse(sessionStorage.getItem("config") as any).sphereType;//获取球体类型
-    sphereType == "粒子" ? createSpotSphere() : createWBSphere(sphereType);//判断需要创建的球体类型
+    sphereType == "particle" ? createSpotSphere() : createWBSphere(sphereType);//判断需要创建的球体类型
     earthGroup.name = "地球组";
     createVirus(data, earthSize); //创建球面病毒
     scene.add(earthGroup);//将球体组添加到场景中
@@ -382,16 +389,16 @@ async function createWBSphere(sphereType: any) {
     //地球材质
     let earthMaterial = new THREE.MeshPhongMaterial({
         map: new THREE.TextureLoader().load(
-            sphereType == "白昼" ? earthImg : earthNightImg //区分昼夜纹理
+            sphereType == "day" ? earthImg : earthNightImg //区分昼夜纹理
         ),
-        color: sphereType == "白昼" ? dayColor : nightColor,
+        color: sphereType == "day" ? dayColor : nightColor,
         // metalness: 1, //生锈的金属外观(MeshStandardMaterial材质时使用)
         // roughness: 0.5, // 材料的粗糙程度(MeshStandardMaterial材质时使用)
         normalScale: new THREE.Vector2(0, 5), //凹凸深度
         normalMap: new THREE.TextureLoader().load(normalImg), //法线贴图
     });
     let earthMesh = new THREE.Mesh(earthGeometry, earthMaterial); //地球网格
-    earthMesh.name = "地球";
+    earthMesh.name = "earth";
     await earthGroup.add(earthMesh); //将地球网格添加到地球组中
 };
 
@@ -520,12 +527,12 @@ function createVirus(data: any, earthSize: any) {
 //创建环
 function createRings() {
     createEquatorSolidRing(earthSize + 20);//创建赤道实线环
-    createEquatorFlyline(earthSize + 30);//创建赤道飞线环
-    createEquatorDottedLineRing(earthSize + 35);//创建赤道虚线环
-    createSpikes(earthSize + 40);//创建赤道尖刺
-    createUpDownRing(earthSize - 50, earthSize - 40);//创建上下环
-    createExpandRing();//创建扩大动画的环
-    createSphereGlow();//创建球体发光环
+    // createEquatorFlyline(earthSize + 30);//创建赤道飞线环
+    // createEquatorDottedLineRing(earthSize + 35);//创建赤道虚线环
+    // createSpikes(earthSize + 40);//创建赤道尖刺
+    // createUpDownRing(earthSize - 50, earthSize - 40);//创建上下环
+    // createExpandRing();//创建扩大动画的环
+    // createSphereGlow();//创建球体发光环
 };
 
 //创建赤道实线环
@@ -648,100 +655,100 @@ function createSpikes(spikeRadius: any) {
     spikesObject.add(spikesMesh); //将网格放进组
 };
 
-//创建上下环
-function createUpDownRing(r1: any, r2: any) {
-    let ringsObject = new THREE.Group(); //创建环的组
-    ringsObject.name = "南北极环";
-    earthGroup.add(ringsObject); //将环添加到场景中
-    //创建内环
-    let a = new THREE.RingGeometry(r1, r1 - 2, 100); //圆环几何体(内半径,外半径,分段数)
-    let ringsOuterMaterial = new THREE.MeshBasicMaterial({
-        color: dvColor.value[0],
-        transparent: true,
-        opacity: .3,
-        side: THREE.DoubleSide,
-        fog: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-    });
-    let o = new THREE.Mesh(a, ringsOuterMaterial);
-    o.rotation.x = 90 * Math.PI / 180; //设置旋转
-    let r = o.clone(); //克隆外环网格o至r
-    o.position.y = 95; //设置位置
-    r.position.y = -95;
-    ringsObject.add(o);
-    ringsObject.add(r);
-    //创建外环
-    let t = new THREE.RingGeometry(r2, r2 - 2, 100);
-    let ringsInnerMaterial = new THREE.MeshBasicMaterial({
-        color: dvColor.value[0],
-        transparent: true,
-        opacity: .3,
-        side: THREE.DoubleSide,
-        fog: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-    });
-    let i = new THREE.Mesh(t, ringsInnerMaterial);
-    i.rotation.x = 90 * Math.PI / 180;
-    let n = i.clone();
-    i.position.y = 100;
-    n.position.y = -100;
-    ringsObject.add(i);
-    ringsObject.add(n);
-};
+// //创建上下环
+// function createUpDownRing(r1: any, r2: any) {
+//     let ringsObject = new THREE.Group(); //创建环的组
+//     ringsObject.name = "南北极环";
+//     earthGroup.add(ringsObject); //将环添加到场景中
+//     //创建内环
+//     let a = new THREE.RingGeometry(r1, r1 - 2, 100); //圆环几何体(内半径,外半径,分段数)
+//     let ringsOuterMaterial = new THREE.MeshBasicMaterial({
+//         color: dvColor.value[0],
+//         transparent: true,
+//         opacity: .3,
+//         side: THREE.DoubleSide,
+//         fog: true,
+//         depthWrite: false,
+//         blending: THREE.AdditiveBlending,
+//     });
+//     let o = new THREE.Mesh(a, ringsOuterMaterial);
+//     o.rotation.x = 90 * Math.PI / 180; //设置旋转
+//     let r = o.clone(); //克隆外环网格o至r
+//     o.position.y = 95; //设置位置
+//     r.position.y = -95;
+//     ringsObject.add(o);
+//     ringsObject.add(r);
+//     //创建外环
+//     let t = new THREE.RingGeometry(r2, r2 - 2, 100);
+//     let ringsInnerMaterial = new THREE.MeshBasicMaterial({
+//         color: dvColor.value[0],
+//         transparent: true,
+//         opacity: .3,
+//         side: THREE.DoubleSide,
+//         fog: true,
+//         depthWrite: false,
+//         blending: THREE.AdditiveBlending,
+//     });
+//     let i = new THREE.Mesh(t, ringsInnerMaterial);
+//     i.rotation.x = 90 * Math.PI / 180;
+//     let n = i.clone();
+//     i.position.y = 100;
+//     n.position.y = -100;
+//     ringsObject.add(i);
+//     ringsObject.add(n);
+// };
 
 //创建渐变环
-function createExpandRing() {
-    let ringMaterial = new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader().load(ringImg),
-        color: new THREE.Color(dvColor.value[0]),//颜色
-        transparent: true,
-        opacity: 1,
-        side: THREE.DoubleSide,
-        fog: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-    });
-    let ringGeometry = new THREE.PlaneGeometry(earthSize * 2, earthSize * 2, 10, 10);
-    expandRingMesh = new THREE.Mesh(ringGeometry, ringMaterial);
-    expandRingMesh.name = "放大环";
-    expandRingMesh.rotation.x = 90 * Math.PI / 180;
-    earthGroup.add(expandRingMesh);
-};
+// function createExpandRing() {
+//     let ringMaterial = new THREE.MeshBasicMaterial({
+//         map: new THREE.TextureLoader().load(ringImg),
+//         color: new THREE.Color(dvColor.value[0]),//颜色
+//         transparent: true,
+//         opacity: 1,
+//         side: THREE.DoubleSide,
+//         fog: true,
+//         depthWrite: false,
+//         blending: THREE.AdditiveBlending,
+//     });
+//     let ringGeometry = new THREE.PlaneGeometry(earthSize * 2, earthSize * 2, 10, 10);
+//     expandRingMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+//     expandRingMesh.name = "放大环";
+//     expandRingMesh.rotation.x = 90 * Math.PI / 180;
+//     earthGroup.add(expandRingMesh);
+// };
 
 //创建渐变环动画
-function createExpandRingAnimation() {
-    gsap.isTweening(expandRingMesh.scale) ||//环动画
-        (gsap.fromTo(
-            expandRingMesh.scale,//缩放渐变
-            { x: 1, y: 1, },
-            { x: 2.7, y: 2.7, duration: 1.5 }
-        ),
-            gsap.fromTo(
-                expandRingMesh.material,//材质的透明度渐变
-                { opacity: 1, },
-                { opacity: 0, duration: 1.5 }
-            ))
-};
+// function createExpandRingAnimation() {
+//     gsap.isTweening(expandRingMesh.scale) ||//环动画
+//         (gsap.fromTo(
+//             expandRingMesh.scale,//缩放渐变
+//             { x: 1, y: 1, },
+//             { x: 2.7, y: 2.7, duration: 1.5 }
+//         ),
+//             gsap.fromTo(
+//                 expandRingMesh.material,//材质的透明度渐变
+//                 { opacity: 1, },
+//                 { opacity: 0, duration: 1.5 }
+//             ))
+// };
 
 //创建球体发光环
-function createSphereGlow() {
-    //SpriteMaterial材质始终朝向平面
-    let glowMaterial = new THREE.SpriteMaterial({
-        map: new THREE.TextureLoader().load(earthGlowImg),
-        color: new THREE.Color(dvColor.value[0]),//颜色
-        transparent: true,
-        opacity: 1,
-        side: THREE.DoubleSide,
-        fog: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-    })
-    let glowSprite = new THREE.Sprite(glowMaterial);
-    glowSprite.scale.set(earthSize * 3.2, earthSize * 3.2, 1); //点大小
-    earthGroup.add(glowSprite);
-};
+// function createSphereGlow() {
+//     //SpriteMaterial材质始终朝向平面
+//     let glowMaterial = new THREE.SpriteMaterial({
+//         map: new THREE.TextureLoader().load(earthGlowImg),
+//         color: new THREE.Color(dvColor.value[0]),//颜色
+//         transparent: true,
+//         opacity: 1,
+//         side: THREE.DoubleSide,
+//         fog: true,
+//         depthWrite: false,
+//         blending: THREE.AdditiveBlending,
+//     })
+//     let glowSprite = new THREE.Sprite(glowMaterial);
+//     glowSprite.scale.set(earthSize * 3.2, earthSize * 3.2, 1); //点大小
+//     earthGroup.add(glowSprite);
+// };
 
 //创建鼠标控件
 function createOrbitControls() {
@@ -768,7 +775,7 @@ function render() {
     orbitControls.update(); //鼠标控件实时更新
     dotLineRingMesh && (dotLineRingMesh.rotation.y += 5);//虚线环自转
     flylineMesh && (flylineMesh.rotation.z -= .15);//飞线自转
-    createExpandRingAnimation();//渐变环动画
+    // createExpandRingAnimation();//渐变环动画
     renderer.render(scene, camera);
 };
 
@@ -820,6 +827,7 @@ function sortFun(arr: any) {
     });
     return arr;
 };
+
 
 //国家排名柱状图
 function histogramChartFun(list: any) {
@@ -907,8 +915,8 @@ function histogramChartFun(list: any) {
 
 //获取用户ip信息
 function getLocationMsg() {
-    if (dataType.value == "在线") {
-        let jsonpUrl: any = process.env.VUE_APP_3;
+    if (dataType.value == "Online") {
+        let jsonpUrl: any = process.env.VITE_APP_3;
         // jsonp(jsonpUrl, (res: any) => {
         //     userMsg.value = res;
         //     getProvinceData();//获取当前省份数据
@@ -924,16 +932,21 @@ function getLocationMsg() {
 function getProvinceData() {
     let pro = userMsg.value.pro;//当前省中文名
     let ePro = "";//英文省名
-    if (dataType.value == "在线") {
+    
+    if (dataType.value == "Online") {
         allData.value.list.forEach((l: any) => {
             if (pro.search(l.name) >= 0) {
                 ePro = l.ename;//遍历获取到英文名
             }
         })
+        
         // jsonp1(
-        //     process.env.VUE_APP_5,
+            // 测试使用import 环境变量
+        //     // import.meta.env.VITE_APP_2,
+        //     process.env.VITE_APP_2
         //     (res: any) => {
         //         currentProvinceData.value = res.data;//获取到当前省数据
+        //         console.log(res.data)
         //     },
         //     "val1",
         //     "mod=province&province=" + ePro
@@ -982,7 +995,8 @@ async function openPreview() {
     })
     //城市名未找到时将省名添加到文件名中
     if (!wordData.wordName) {
-        wordData.hasCityData = false;
+        alert(wordData.overviewData.name)
+        wordData.hasCityData = true;
         wordData.wordName = wordData.overviewData.name;
     }
     await getWordBlob("docx/word.docx", wordData).
@@ -1000,7 +1014,7 @@ async function openPreview() {
 
 <template>
     <dv-border-box-1 class="container" :color="dvColor" v-loading="isLoading"
-        element-loading-background="rgba(0, 0, 0, 0.9)" element-loading-text="数据加载中...">
+        element-loading-background="rgba(0, 0, 0, 0.9)" element-loading-text="Loading data...">
         <div class="isMobile-div" v-if="mobileDiv">
             <!--手机端遮罩-->
         </div>
@@ -1010,13 +1024,13 @@ async function openPreview() {
             <div class="name-div" :style="{ backgroundColor: sysBackgroundColor }">
                 <dv-decoration-4 :reverse="true"  class="name-dv" :color="dvColor" />
                 <dv-decoration-12 class="sys-name" :color="dvColor">
-                    疫情可视化
+                    Visualization of COVID-19
                 </dv-decoration-12>
                 <dv-decoration-4 :reverse="true" class="name-dv" :color="dvColor" />
             </div>
             <dv-decoration-7 class="sys-msg" :style="{ backgroundColor: sysBackgroundColor }" :color="dvColor">
                 <span>
-                    {{ dataType }}数据截止{{ allData.mtime }}
+                    {{ dataType }} data as of {{ allData.mtime }}
                 </span>
             </dv-decoration-7>
             <dv-decoration-5 :color="dvColor" style=" margin: auto;width:60%;height:60px;margin-top: -30px;" />
@@ -1027,7 +1041,7 @@ async function openPreview() {
 
         <!--全球柱状图-->
         <dv-border-box-4 :reverse="true" :color="dvColor" class="sphereDataDiv">
-            <p>累计确诊前{{ sliceNum }}国家</p>
+            <p>Top {{ sliceNum }} countries with cumulative diagnosis</p>
             <dv-decoration-6 :color="dvColor" style="width:80%;height:20px;margin: -20px 0px 0px 10%" />
             <div class="histogramDivDiv">
                 <div id="histogramDiv"></div>
@@ -1044,19 +1058,19 @@ async function openPreview() {
         <!--数字盒子-->
         <dv-border-box-4 :color="dvColor" class="numDiv">
             <div class="addconDiv" :style="{ backgroundColor: sysBackgroundColor }">
-                <div class="tit">全球现存确诊</div>
+                <div class="tit">Global Existing Confirmations</div>
                 <addNumber class="certain-div" :value="certain" :time="10" :thousandSign="true" />
-                <div class="day-tit">今日{{ othertotal.certain_inc }}</div>
+                <div class="day-tit">today{{ othertotal.certain_inc }}</div>
             </div>
             <div class="addcureDiv" :style="{ backgroundColor: sysBackgroundColor }">
-                <div class="tit">全球累计治愈</div>
+                <div class="tit">Global cumulative cure</div>
                 <addNumber class="addcure-div" :value="addcure" :time="10" :thousandSign="true" />
-                <div class="day-tit">今日{{ othertotal.recure_inc }}</div>
+                <div class="day-tit">today{{ othertotal.recure_inc }}</div>
             </div>
             <div class="addDieDiv" :style="{ backgroundColor: sysBackgroundColor }">
-                <div class="tit">全球累计死亡</div>
+                <div class="tit">Global cumulative deaths</div>
                 <addNumber class="addDie-div" :value="addDie" :time="10" :thousandSign="true" />
-                <div class="day-tit">今日{{ othertotal.die_inc }}</div>
+                <div class="day-tit">today{{ othertotal.die_inc }}</div>
             </div>
         </dv-border-box-4>
 
@@ -1067,29 +1081,29 @@ async function openPreview() {
                 <el-icon :size="20" style="margin-right: 10px;">
                     <List />
                 </el-icon>
-                全球数据
+                Global data
             </el-button>
             <el-button class="btn" :color=dvColor[0] @click="isChina = true">
                 <el-icon :size="20" style="margin-right:10px;">
                     <List />
                 </el-icon>
-                国内数据
+                Domestic data
             </el-button>
             <el-button class="btn" :color=dvColor[0] @click="isEchart = true;">
                 <el-icon :size="20" style="margin-right: 10px;">
                     <TrendCharts />
                 </el-icon>
-                国内分析
+                Domestic analysis
             </el-button>
             <el-button class="btn" :color=dvColor[0] @click="provinceAnalyze">
                 <el-icon :size="20" style="margin-right: 10px;">
                     <TrendCharts />
                 </el-icon>
-                省内分析
+                Provincial analysis
             </el-button>
             <el-button class="btn" :color=dvColor[0] @click="openPreview">
                 <img :src="wordImg">
-                生成报告
+                Generate the report
             </el-button>
         </dv-border-box-10>
         <dv-decoration-1 class="btn-dv2" :color="dvColor" />

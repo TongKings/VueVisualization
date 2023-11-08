@@ -4,7 +4,7 @@
         <el-drawer v-model="isProvinceEchartDrawer" :with-header="false" direction="ttb" :close-on-click-modal="false"
             :before-close="handleClose" size='100%'>
             <div class="my-header">
-                <span>省内分析</span>
+                <span>Provincial analysis</span>
                 <el-icon :size="40" @click="handleClose" :color="dvColor[0]" class="close-icon">
                     <Close />
                 </el-icon>
