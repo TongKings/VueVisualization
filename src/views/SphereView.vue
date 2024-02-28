@@ -258,16 +258,16 @@ function init(data: any) {
     let width = dom.clientWidth;
     let height = dom.clientHeight;
     scene = new THREE.Scene(); //场景场景
-    camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); //创建透视相机(视场、长宽比、近面、远面)
-    camera.position.set(0, 50, 350); //设置相机位置
-    camera.lookAt(0, 0, 0);
+    camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); //创建透视相机(相机视口角度、长宽比、距离观察者近面距离、距离观察者远面距离)
+    camera.position.set(0, 50, 350); //设置相机位置(x,y,z)
+    camera.lookAt(0, 0, 0); // 默认为Z轴负半轴方向, 就是相机看向哪一个点
     //创建渲染器
     renderer = new THREE.WebGLRenderer({
         antialias: true, //抗锯齿
         alpha: true, //透明
     });
-    renderer.setClearColor(0x000000, 0.1); //设置场景透明度
-    renderer.setSize(width, height); //设置渲染区域尺寸
+    renderer.setClearColor(0x000000, 0.0); //设置场景透明度
+    renderer.setSize(width, height); //设置渲染区域尺寸，就是设置元素的的canvas宽高
     dom.appendChild(renderer.domElement); //将渲染器添加到dom中形成canvas
     createUniverse(); //创建宇宙
     createStars(); //创建星辰
@@ -288,11 +288,14 @@ function onWindowResize() {
 
 //创建宇宙(球形宇宙)
 function createUniverse() {
-    let universeGeometry = new THREE.SphereGeometry(500, 100, 100);
+    // 创建一个宇宙球体(半径，水平方向分段数量，竖直方向分段数量)
+    let universeGeometry = new THREE.SphereGeometry(500, 100, 100); 
+    // MeshBasicMaterial 基础网格材质
+    // MeshLambertMaterial 非光泽表面的网格材质
     let universeMaterial = new THREE.MeshLambertMaterial({
-        //高光材质
+        //非光泽表面的网格材质
         map: new THREE.TextureLoader().load(universeImg),
-        side: THREE.DoubleSide, //双面显示
+        side: THREE.DoubleSide, //双面显示,默认展示前面 FrontSide
     });
     //宇宙网格
     let universeMesh = new THREE.Mesh(universeGeometry, universeMaterial);
@@ -304,6 +307,8 @@ function createUniverse() {
 function createStars() {
     const positions = [];
     const colors = [];
+    // Threejs中常用的几何体，这些几何体都是基于BufferGeometry (opens new window)类构建的
+    // BufferGeometry可以自定义任何几何形状比如点、线、面等；
     //星辰几何体
     const starsGeometry = new THREE.BufferGeometry();
     //添加星辰的颜色与位置
@@ -317,22 +322,27 @@ function createStars() {
         color.setRGB(255, 255, 255);
         colors.push(color.r, color.g, color.b);
     }
+    // position 对应的是顶点
     starsGeometry.setAttribute(
         "position",
         new THREE.Float32BufferAttribute(positions, 3)
     );
+    // color 对应的是颜色
     starsGeometry.setAttribute(
         "color",
         new THREE.Float32BufferAttribute(colors, 3)
     );
-    //星辰材质
+    //星辰材质 (使用点材质创建)
     let starsMaterial = new THREE.PointsMaterial({
         map: new THREE.TextureLoader().load(starImg),
         size: 4,
+        // 这里使用的是叠加色混合，即混合颜色 = 源颜色 + 目标颜色
         blending: THREE.AdditiveBlending,
         fog: true,
+        // depthTest是一个设置项，是否在绘制的时候检查，当前像素前面是否有别的像素，
         depthTest: false, //(不能与blending一起使用)
     });
+    // 点对象用于渲染单个点，可以通过添加多个点对象来形成点云
     //星辰的集合
     let starsMesh = new THREE.Points(starsGeometry, starsMaterial);
     starsMesh.scale.set(1000, 1000, 1000); //设置集合体范围
@@ -343,7 +353,8 @@ function createStars() {
 //创建光源
 function createLight() {
     let lightColor = new THREE.Color(0xffffff);
-    let ambient = new THREE.AmbientLight(lightColor); //环境光
+    //环境光 它是一种均匀分布的光,它用于模拟全局光照，使场景中的物体不会完全黑暗。
+    let ambient = new THREE.AmbientLight(lightColor); 
     ambient.name = "环境光";
     scene.add(ambient);
     //   let pointLight = new THREE.PointLight(lightColor, 2, 1, 0); //点光源
@@ -351,6 +362,7 @@ function createLight() {
     //   pointLight.position.set(0, 0, 1000); //点光源在原点充当太阳
     //   pointLight.name = "点光源";
     //   scene.add(pointLight); //点光源添加到场景中
+    // 加平行光 使得星空更加明亮
     let directionalLight1 = new THREE.DirectionalLight(lightColor);
     directionalLight1.position.set(0, 0, 1000);
     scene.add(directionalLight1); //平行光源添加到场景中
@@ -373,8 +385,10 @@ function createLight() {
 
 //创建球体
 async function createSphere(data: any) {
-    let sphereType = JSON.parse(sessionStorage.getItem("config") as any).sphereType;//获取球体类型
-    sphereType == "particle" ? createSpotSphere() : createWBSphere(sphereType);//判断需要创建的球体类型
+    //获取球体类型
+    let sphereType = JSON.parse(sessionStorage.getItem("config") as any).sphereType;
+    //判断需要创建的球体类型
+    sphereType == "particle" ? createSpotSphere() : createWBSphere(sphereType);
     earthGroup.name = "地球组";
     createVirus(data, earthSize); //创建球面病毒
     scene.add(earthGroup);//将球体组添加到场景中
@@ -386,7 +400,7 @@ async function createWBSphere(sphereType: any) {
     let earthGeometry = new THREE.SphereGeometry(earthSize, 100, 100); //地球几何体
     let nightColor = new THREE.Color(0x999999);
     let dayColor = new THREE.Color(0x444444);
-    //地球材质
+    //地球材质 MeshPhongMaterial材质可以创建一种光亮的材质
     let earthMaterial = new THREE.MeshPhongMaterial({
         map: new THREE.TextureLoader().load(
             sphereType == "day" ? earthImg : earthNightImg //区分昼夜纹理
@@ -405,10 +419,12 @@ async function createWBSphere(sphereType: any) {
 //创建斑点球体
 async function createSpotSphere() {
     let globeBufferGeometry = new THREE.SphereGeometry(earthSize - 3, 50, 50);//球体几何体
+    // 网格基础材质
     let globeInnerMaterial = new THREE.MeshBasicMaterial({
         color: new THREE.Color(dvColor.value[0]),//颜色
         transparent: true,//透明
         opacity: .4,//不透明度
+        //雾化效果
         fog: new THREE.Fog(0x050505, 2000, 3500),
 
     });
@@ -420,7 +436,7 @@ async function createSpotSphere() {
     createSpot();//创建球面斑点
 };
 
-//创建球面斑点
+//创建球面斑点,就是地球上的陆地效果
 function createSpot() {
     let img = new Image();
     img.src = earthGrayscale; //黑白地图
@@ -430,7 +446,8 @@ function createSpot() {
         canvas.width = img.width; //使得canvas尺寸与图片尺寸相同
         canvas.height = img.height;
         (canvas.getContext("2d") as any).drawImage(img, 0, 0, img.width, img.height);//canvas绘制图片
-        let canData = (canvas.getContext("2d") as any).getImageData(0, 0, canvas.width, canvas.height);//获取画布像素数据
+        //获取画布像素数据
+        let canData = (canvas.getContext("2d") as any).getImageData(0, 0, canvas.width, canvas.height);
         let globeCloudBufferGeometry = new THREE.BufferGeometry(); //设置缓冲几何体
         let globeCloudVerticesArray = []; //地球云缓冲几何体顶点
         let o = null; //数组处理时的计数
@@ -457,6 +474,7 @@ function createSpot() {
         let globeCloudMaterial = new THREE.PointsMaterial({
             color: new THREE.Color(dvColor.value[1]),//颜色
             fog: true,
+            // 地图散点大小
             size: 1.5,
             transparent: false,
         });//球面斑点材质
